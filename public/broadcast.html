@@ -3,20 +3,35 @@
   <head>
     <title>Broadcaster</title>
     <meta charset="UTF-8" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="/styles.css" rel="stylesheet" />
   </head>
   <body>
-    <section class="select">
-      <label for="audioSource">Audio source: </label>
-      <select id="audioSource"></select>
-    </section>
+    <div class="container">
+      <div class="row">
+        <div class="col-2"></div>
+          <div class="col-6">
+            <section class="select">
+              <label for="audioSource">Audio source: </label>
+              <select id="audioSource"></select>
+            </section>
 
-    <section class="select">
-      <label for="videoSource">Video source: </label>
-      <select id="videoSource"></select>
-    </section>
+            <section class="select">
+              <label for="videoSource">Video source: </label>
+              <select id="videoSource"></select>
+            </section>
 
-    <video playsinline autoplay muted></video>
+            <video playsinline autoplay muted></video>
+          </div>
+        <div class="col-2"></div>
+      </div>
+    </div>
+    <!--<textarea id="dataChannelReceive" disabled></textarea>-->
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="/broadcast.js"></script>
+    <!--<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="/main.js"></script>-->
+        
   </body>
 </html>
