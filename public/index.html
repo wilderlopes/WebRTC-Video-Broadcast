@@ -1,45 +1,141 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
-    <title>Viewer</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
+    <title>Starter Template for Bootstrap</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/starter-template/">
+
+    <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    <link href="starter-template.css" rel="stylesheet">
     <link href="/styles.css" rel="stylesheet" />
-
     
+    <script src="/face-api.js"></script>
+    <script src="js/commons.js"></script>
+    <script src="js/faceDetectionControls.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
   </head>
+
   <body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand" href="#">Streaming</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <div class="container">
-      <div class="row">
-        <div class="col-2"></div>
-        <div class="col-6">
-        <video playsinline autoplay muted></video>
-        <button id="enable-audio">Enable audio</button>
-
-    <!--<textarea id="dataChannelSend" disabled
-    placeholder="Press Start, enter some text, then press Send."></textarea>
-    <textarea id="dataChannelReceive" disabled></textarea>
-
-    <div id="buttons">
-      <button id="startButton">Start</button>
-      <button id="sendButton">Send</button>
-      <button id="closeButton">Stop</button>
-    </div>-->
-
-    <!--<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
-    <script src="/main.js"></script>-->
-        </div>
-        <div class="col-2"></div>
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+     
       </div>
-    </div>
+    </nav>
+
+    <main role="main" class="container">
+
+      
+        <br>
+        <br>
+        <!-- fps_meter -->
+      <div id="fps_meter" class="row side-by-side">
+        <div>
+          <label for="time">Time:</label>
+          <input disabled value="-" id="time" type="text" class="bold">
+          <label for="fps">Estimated Fps:</label>
+          <input disabled value="-" id="fps" type="text" class="bold">
+        </div>
+      </div>
+      <!-- fps_meter -->
+      
+        <div class="row"></div>
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8">
+              <div style="position: relative" class="margin">                                                           
+                <video onloadedmetadata="onPlay(this)" id="inputVideo" playsinline autoplay muted></video>
+                <canvas id="overlay" />
+              </div>              
+            </div>
+            <div class="col-2"><button id="enable-audio">Enable audio</button></div>
+        </div>
+    
+      
+
+    </main><!-- /.container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/watch.js"></script>
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-  </body>
+    <script>
+        let forwardTimes = []
+
+        function updateTimeStats(timeInMs) {
+        forwardTimes = [timeInMs].concat(forwardTimes).slice(0, 30)
+        const avgTimeInMs = forwardTimes.reduce((total, t) => total + t) / forwardTimes.length
+        $('#time').val(`${Math.round(avgTimeInMs)} ms`)
+        $('#fps').val(`${faceapi.utils.round(1000 / avgTimeInMs)}`)
+        }
+
+        async function onPlay() {
+            const videoEl = document.getElementById('inputVideo')
+
+            if(videoEl.paused || videoEl.ended || !isFaceDetectionModelLoaded())
+                return setTimeout(() => onPlay())
+
+
+            const options = getFaceDetectorOptions()
+
+            const ts = Date.now()
+
+            const result = await faceapi.detectAllFaces(videoEl, options)
+
+            updateTimeStats(Date.now() - ts)
+
+            if (result) {
+                //const detectionsForSize = faceapi.resizeResults(result, { width: videoEl.width, height: videoEl.height })
+                const canvas = document.getElementById('overlay')
+                //canvas.width = videoEl.width
+                //canvas.height = videoEl.height
+                //faceapi.drawDetections(canvas, detectionsForSize, { withScore: true })
+                const dims = faceapi.matchDimensions(canvas, videoEl, true)
+                faceapi.draw.drawDetections(canvas, faceapi.resizeResults(result, dims))
+            }
+
+            setTimeout(() => onPlay())
+        }
+
+        async function run() {
+            // load face detection model -- TINY_FACE_DETECTOR or SSD_MOBILENETV1
+            await changeFaceDetector(SSD_MOBILENETV1)
+            //changeInputSize(128)
+
+            // try to access users webcam and stream the images
+            // to the video element
+            //const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
+            //const videoEl = $('#inputVideo').get(0)
+            //videoEl.srcObject = stream
+        }
+
+        function updateResults() {}
+
+        $(document).ready(function() {
+          initFaceDetectionControls()
+          run()
+        })
+    </script>
+   
+    </body>
 </html>
