@@ -25,11 +25,38 @@
           </div>
         <div class="col-2"></div>
       </div>
+
+      <div class="row">
+        <div class="col-1"></div>
+        <div class="col-10">
+                  
+          <div id="buttons">
+              <button id="startButton">Start</button>
+              <button id="sendButton" disabled>Send</button>
+              <button id="closeButton" disabled>Stop</button>
+          </div>
+    
+          <div id="sendReceive">
+              <div id="send">
+                  <h2>Send</h2>
+                  <textarea id="dataChannelSend" disabled
+                            placeholder="Press Start, enter some text, then press Send."></textarea>
+              </div>
+              <div id="receive">
+                  <h2>Receive</h2>
+                  <textarea id="dataChannelReceive" disabled></textarea>
+              </div>
+          </div>
+        
+        </div>
+        <div class="col-1"></div>
+      </div>
     </div>
     <!--<textarea id="dataChannelReceive" disabled></textarea>-->
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/broadcast.js"></script>
+    <script src="js/mainDataChannel.js" async></script>
     <!--<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script src="/main.js"></script>-->
         
